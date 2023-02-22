@@ -1,0 +1,39 @@
+import pandas as pd
+
+#Import dataset
+data = pd.read_csv('SuperStoreOrders.csv')
+#Create Dataframe
+df = pd.DataFrame(data)
+df
+
+#Add new column Gross Profit
+df['gross_profit'] = df['profit']-df['shipping_cost']
+df
+
+#Retrieve the sales from 10 to 400
+sales = df[(df['sales'] >= 10) & (df['sales'] <= 400)]
+sales
+
+#Convert the string into int
+df['sales'] = df['sales'].str.replace(',', '').astype(int)
+print(df.dtypes)
+
+#Get all products remove duplication with unique function
+all_products = df['product_name'].unique()
+#Group the region column for check the availablity of the product
+grouped = df.groupby('region')
+not_available_df = pd.DataFrame(columns=['Region', 'Products Not Available'])
+#Loop for check the region and product one bt one
+for region_name, region_df in grouped:
+    available = region_df['product_name'].unique()
+    #Remove the available products from all products
+    not_available = set(all_products) - set(available)
+    #Dictionary for new dataframe
+    region_data = {'Region': region_name, 'Products Not Available': not_available}
+    not_available_df = pd.concat([not_available_df, pd.DataFrame([region_data])], ignore_index=True)
+#Print the result
+print(not_available_df)
+
+#Sort the quantity column using sort and lambda function with groupby method
+sorted_df = df.groupby('quantity').apply(lambda x: x.sort_values(by='quantity'))
+sorted_df
